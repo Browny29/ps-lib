@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 type process struct {
 	PID  string
 	TTY  string
-	Time string
+	Time time.Time
 	CMD  string
 }
 
@@ -76,8 +77,15 @@ func getProcessInformation(pid string) (*process, error) {
 	proc.CMD = data[nameStart : nameEnd+nameStart]
 
 	proc.TTY = findProcValue(data, 8) // TTY is at index 8 in the stat file
-	proc.Time = findProcValue(data, 23)
 
+	// These two lines could be fit into a one liner, but for readability I split them
+	stringTime := findProcValue(data, 23)
+	unixTime, err := strconv.ParseInt(stringTime, 10, 64) // TTY is at index 23 in the stat file
+	if err != nil {
+		return nil, err
+	}
+
+	proc.Time = time.Unix(0, unixTime)
 	return proc, nil
 }
 
