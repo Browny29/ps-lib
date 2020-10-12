@@ -10,7 +10,11 @@ import (
 )
 
 func main() {
-	processes, _ := getProc()
+	processes, err := getProc()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	fmt.Println("PID TTY Time CMD")
 	for _, p := range processes {
@@ -76,11 +80,11 @@ func getProcessInformation(pid string) (*process, error) {
 	nameEnd := strings.IndexRune(data[nameStart:], ')')
 	proc.CMD = data[nameStart : nameEnd+nameStart]
 
-	proc.TTY = findProcValue(data, 8) // TTY is at index 8 in the stat file
+	proc.TTY = findProcValue(data, 7) // TTY is at index 8 in the stat file
 
 	// These two lines could be fit into a one liner, but for readability I split them
-	stringTime := findProcValue(data, 23)
-	seconds, err := strconv.ParseInt(stringTime, 10, 64) // TTY is at index 23 in the stat file
+	stringTime := findProcValue(data, 24)
+	seconds, err := strconv.ParseInt(stringTime[:11], 10, 64) // TTY is at index 25 in the stat file
 	if err != nil {
 		return nil, err
 	}
