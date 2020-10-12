@@ -50,3 +50,34 @@ func Test_GetProcessInformation(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func Test_GetProc(t *testing.T) {
+	// The mocks are in kind of a weird place. Normally I would have used a mock library, but I couldn't get it working in the short amount of time. So I improvised
+	procGetter = NewMockedService()
+	result, err := getProc()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(result) != 1 {
+		fmt.Print(len(result), 1)
+		t.Fail()
+	}
+
+	if result[0].PID != "13936" {
+		fmt.Print(result[0].PID, "13936")
+		t.Fail()
+	}
+	if result[0].TTY != "-1" {
+		fmt.Print(result[0].TTY, "-1")
+		t.Fail()
+	}
+	if result[0].CMD != "bash" {
+		fmt.Print(result[0].CMD, "bash")
+		t.Fail()
+	}
+	if !result[0].Time.Equal(time.Unix(854085461, 0)) {
+		fmt.Print(result[0].Time.Unix(), 854085461)
+		t.Fail()
+	}
+}
