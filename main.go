@@ -2,14 +2,21 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
+var procGetter iProcGetter
+
+type iProcGetter interface {
+	GetProcByPID(pid string) ([]byte, error)
+	GetProcDirectories() ([]string, error)
+}
+
 func main() {
+	procGetter = NewProcService()
+
 	processes, err := getProc()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -23,25 +30,12 @@ func main() {
 
 }
 
-type process struct {
-	PID  string
-	TTY  string
-	Time time.Time
-	CMD  string
-}
-
 func getProc() ([]process, error) {
-	procDir, err := os.Open("/proc")
+	dirNames, err := procGetter.GetProcDirectories()
 	if err != nil {
 		return nil, err
 	}
-	defer procDir.Close()
-
-	dirNames, err := procDir.Readdirnames(0)
 	processes := make([]process, len(dirNames))
-	if err != nil {
-		return nil, err
-	}
 
 	i := 0
 	for _, name := range dirNames {
@@ -68,8 +62,7 @@ func getProcessInformation(pid string) (*process, error) {
 		PID: pid,
 	}
 
-	statPath := fmt.Sprintf("/proc/%s/stat", pid)
-	bytes, err := ioutil.ReadFile(statPath)
+	bytes, err := procGetter.GetProcByPID(pid)
 	if err != nil {
 		return nil, err
 	}
