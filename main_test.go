@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"testing"
+	"time"
 )
 
 func Test_FindProcValue(t *testing.T) {
@@ -24,13 +26,27 @@ func Test_FindProcValue(t *testing.T) {
 }
 
 func Test_GetProcessInformation(t *testing.T) {
+	// The mocks are in kind of a weird place. Normally I would have used a mock library, but I couldn't get it working in the short amount of time. So I improvised
 	procGetter = NewMockedService()
 	resultProc, err := getProcessInformation("13936")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if resultProc.PID != "13936" {t.Fail()}
-	if resultProc.TTY != "-1" {t.Fail()}
-	if resultProc.CMD != "bash" {t.Fail()}
+	if resultProc.PID != "13936" {
+		fmt.Print(resultProc.PID, "13936")
+		t.Fail()
+	}
+	if resultProc.TTY != "-1" {
+		fmt.Print(resultProc.TTY, "-1")
+		t.Fail()
+	}
+	if resultProc.CMD != "bash" {
+		fmt.Print(resultProc.CMD, "bash")
+		t.Fail()
+	}
+	if !resultProc.Time.Equal(time.Unix(854085461, 0)) {
+		fmt.Print(resultProc.Time.Unix(), 854085461)
+		t.Fail()
+	}
 }
