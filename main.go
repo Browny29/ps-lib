@@ -33,10 +33,13 @@ func getProc() ([]process, error) {
 	defer procDir.Close()
 
 	dirNames, err := procDir.Readdirnames(0)
-	processes := make([]process, 0, len(dirNames))
+	processes := make([]process, len(dirNames))
 	if err != nil {
 		return nil, err
 	}
+
+
+	fmt.Println(strconv.Itoa(len(dirNames)))
 
 	i := 0
 	for _, name := range dirNames {
@@ -56,7 +59,7 @@ func getProc() ([]process, error) {
 		i++ // We want to increment the i only when a process has been added. So we do it at the end
 	}
 
-	return nil, nil
+	return processes[:i], nil
 }
 
 func getProcessInformation(pid string) (*process, error) {
