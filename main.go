@@ -15,7 +15,9 @@ type iProcGetter interface {
 }
 
 func main() {
-	procGetter = NewProcService()
+	if procGetter == nil {
+		procGetter = NewProcService()
+	}
 
 	processes, err := getProc()
 	if err != nil {
