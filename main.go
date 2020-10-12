@@ -38,9 +38,6 @@ func getProc() ([]process, error) {
 		return nil, err
 	}
 
-
-	fmt.Println(strconv.Itoa(len(dirNames)))
-
 	i := 0
 	for _, name := range dirNames {
 		// If the name is not a number it is not a process, so we continue
@@ -49,7 +46,6 @@ func getProc() ([]process, error) {
 			continue
 		}
 
-		fmt.Println(name)
 		result, err := getProcessInformation(name)
 		if err != nil {
 			return processes, err
@@ -79,9 +75,8 @@ func getProcessInformation(pid string) (*process, error) {
 	nameEnd := strings.IndexRune(data[nameStart:], ')')
 	proc.CMD = data[nameStart : nameEnd+nameStart]
 
-	proc.TTY = findProcValue(data, 8)
+	proc.TTY = findProcValue(data, 8) // TTY is at index 8 in the stat file
 	proc.Time = findProcValue(data, 23)
-
 
 	return proc, nil
 }
