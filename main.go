@@ -2,19 +2,26 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
-	"time"
+	"strings"
 )
 
 func main() {
-	fmt.Println("hello word")
+	processes, _ := getProc()
+
+	fmt.Println("PID TTY Time CMD")
+	for _, p := range processes {
+		fmt.Println(fmt.Sprintf("%s %s %s %s", p.PID, p.TTY, p.Time, p.CMD))
+	}
+
 }
 
 type process struct {
 	PID  string
 	TTY  string
-	Time time.Time
+	Time string
 	CMD  string
 }
 
@@ -53,5 +60,43 @@ func getProc() ([]process, error) {
 }
 
 func getProcessInformation(pid string) (*process, error) {
-	return nil, nil
+	proc := &process{
+		PID: pid,
+	}
+
+	statPath := fmt.Sprintf("/proc/%s/stat", pid)
+	bytes, err := ioutil.ReadFile(statPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the name of the executable
+	data := string(bytes)
+	nameStart := strings.IndexRune(data, '(') + 1
+	nameEnd := strings.IndexRune(data[nameStart:], ')')
+	proc.CMD = data[nameStart : nameEnd+nameStart]
+
+	proc.TTY = findProcValue(data, 8)
+	proc.Time = findProcValue(data, 23)
+
+
+	return proc, nil
+}
+
+func findProcValue(procData string, index int) string {
+	var procValue string
+	for i, char := range procData {
+		if index <= 0 {
+			procValue = procData[i:]
+			valueEnd := strings.IndexRune(procValue, ' ')
+			procValue = procValue[:valueEnd]
+
+			return procValue
+		}
+		if char == ' ' {
+			index--
+		}
+	}
+
+	return ""
 }
