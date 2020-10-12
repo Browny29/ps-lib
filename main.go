@@ -32,7 +32,6 @@ func getProc() ([]process, error) {
 	}
 
 	i := 0
-
 	for _, name := range dirNames {
 		// If the name is not a number it is not a process, so we continue
 		_, err := strconv.Atoi(name)
@@ -40,14 +39,14 @@ func getProc() ([]process, error) {
 			continue
 		}
 
-		i++
-
+		fmt.Println(name)
 		result, err := getProcessInformation(name)
 		if err != nil {
 			return processes, err
 		}
 
 		processes[i] = *result
+		i++ // We want to increment the i only when a process has been added. So we do it at the end
 	}
 
 	return nil, nil
